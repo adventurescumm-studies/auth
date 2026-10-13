@@ -21,6 +21,8 @@ pipeline {
                 deleteDir()
                 checkout scm
                 script {
+                    // Exporta explicitamente o parametro e preserva false.
+                    env.SKIP_TESTS = (params.SKIP_TESTS == null ? true : params.SKIP_TESTS).toString()
                     env.MAVEN_REPO = "${pwd(tmp: true)}/maven-repository"
                 }
                 sh '''
@@ -36,9 +38,9 @@ pipeline {
                 sh '''
                     set -eu
                     if [ -f ./mvnw ]; then
-                        sh ./mvnw -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=$SKIP_TESTS" clean install
+                        sh ./mvnw -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=${SKIP_TESTS:-true}" clean install
                     else
-                        mvn -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=$SKIP_TESTS" clean install
+                        mvn -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=${SKIP_TESTS:-true}" clean install
                     fi
                 '''
             }
